@@ -13,19 +13,70 @@ function ScoreBar({ value, max = 100 }) {
 }
 
 function GroupCard({ group }) {
-  const [scores, setScores]     = useState([]);
-  const [expanded, setExpanded] = useState(false);
+  const [scores, setScores]       = useState([]);
+  const [members, setMembers]     = useState([]);
+  const [expanded, setExpanded]   = useState(false);
+  const [editing, setEditing]     = useState(false);
+  const [groupName, setGroupName] = useState(group.group_name);
+  const [unit, setUnit]           = useState(group.unit);
+  const [newEmail, setNewEmail]   = useState("");
+  const [editMsg, setEditMsg]     = useState("");
 
   const loadScores = async () => {
     if (!expanded) {
-      const res = await axios.get(`${API}/scores/${group.id}`);
-      setScores(res.data);
+      const [scoresRes, membersRes] = await Promise.all([
+        axios.get(`${API}/scores/${group.id}`),
+        axios.get(`${API}/group-members/${group.id}`)
+      ]);
+      setScores(scoresRes.data);
+      setMembers(membersRes.data);
     }
     setExpanded(!expanded);
   };
 
+  const handleUpdate = async () => {
+    try {
+      await axios.put(`${API}/update-group/${group.id}`, {
+        group_name: groupName,
+        unit:       unit
+      });
+      setEditMsg("✅ Group updated successfully.");
+      setEditing(false);
+    } catch (err) {
+      setEditMsg("❌ Failed to update group.");
+    }
+  };
+
+  const handleAddMember = async () => {
+    if (!newEmail) return;
+    try {
+      await axios.post(`${API}/add-member`, {
+        group_id:   group.id,
+        user_email: newEmail
+      });
+      setMembers([...members, { user_email: newEmail, role: "member" }]);
+      setNewEmail("");
+      setEditMsg(`✅ ${newEmail} added.`);
+    } catch (err) {
+      setEditMsg(err.response?.data?.message || "❌ Failed to add member.");
+    }
+  };
+
+  const handleRemoveMember = async (email) => {
+    try {
+      await axios.delete(`${API}/remove-member`, {
+        data: { group_id: group.id, user_email: email }
+      });
+      setMembers(members.filter(m => m.user_email !== email));
+      setEditMsg(`✅ ${email} removed.`);
+    } catch (err) {
+      setEditMsg("❌ Failed to remove member.");
+    }
+  };
+
   return (
     <div style={styles.groupCard}>
+      {/* Group header */}
       <div style={styles.groupHeader}>
         <div>
           <span style={styles.groupName}>{group.group_name}</span>
@@ -37,11 +88,62 @@ function GroupCard({ group }) {
           <a href={group.drive_folder_url} target="_blank"
             rel="noreferrer" style={styles.link}>Drive</a>
           <button style={styles.scoresBtn} onClick={loadScores}>
-            {expanded ? "Hide Scores" : "View Scores"}
+            {expanded ? "Hide" : "View Scores"}
+          </button>
+          <button style={styles.editBtn} onClick={async () => {
+            if (!editing) {
+              const res = await axios.get(`${API}/group-members/${group.id}`);
+              setMembers(res.data);
+            }
+            setEditing(!editing);
+            setEditMsg("");
+          }}>
+            {editing ? "Cancel" : "Edit"}
           </button>
         </div>
       </div>
 
+      {/* Edit panel */}
+      {editing && (
+        <div style={styles.editPanel}>
+          <h4 style={styles.scoresTitle}>Edit Group</h4>
+          {editMsg && <p style={styles.editMsg}>{editMsg}</p>}
+
+          <input style={styles.editInput} value={groupName}
+            onChange={e => setGroupName(e.target.value)}
+            placeholder="Group name" />
+          <input style={styles.editInput} value={unit}
+            onChange={e => setUnit(e.target.value)}
+            placeholder="Unit" />
+          <button style={styles.saveBtn} onClick={handleUpdate}>
+            Save Changes
+          </button>
+
+          <div style={styles.memberSection}>
+            <h5 style={styles.memberTitle}>Members</h5>
+            {members.map(m => (
+              <div key={m.user_email} style={styles.memberEditRow}>
+                <span style={styles.memberEmail}>{m.user_email}</span>
+                <span style={styles.memberRole}>{m.role}</span>
+                <button style={styles.removeBtn}
+                  onClick={() => handleRemoveMember(m.user_email)}>
+                  Remove
+                </button>
+              </div>
+            ))}
+            <div style={styles.addMemberRow}>
+              <input style={styles.addMemberInput} value={newEmail}
+                onChange={e => setNewEmail(e.target.value)}
+                placeholder="Add member email" />
+              <button style={styles.addBtn} onClick={handleAddMember}>
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Scores panel */}
       {expanded && (
         <div style={styles.scoresSection}>
           <h4 style={styles.scoresTitle}>AI Contribution Scores</h4>
@@ -203,6 +305,41 @@ const styles = {
                     height: "8px", transition: "width 0.3s ease" },
   scoreBreakdown: { display: "flex", gap: "12px", flexWrap: "wrap",
                     fontSize: "11px", color: "#888" },
+  editBtn:       { fontSize: "12px", backgroundColor: "#4285F4",
+                 color: "white", border: "none", padding: "4px 10px",
+                 borderRadius: "4px", cursor: "pointer" },
+editPanel:     { marginTop: "16px", borderTop: "1px solid #eee",
+                 paddingTop: "16px" },
+editInput:     { width: "100%", padding: "8px 12px", marginBottom: "8px",
+                 border: "1px solid #ddd", borderRadius: "6px",
+                 fontSize: "14px", boxSizing: "border-box" },
+saveBtn:       { backgroundColor: "#1a1a2e", color: "white",
+                 border: "none", padding: "8px 16px",
+                 borderRadius: "4px", cursor: "pointer",
+                 fontSize: "13px", marginBottom: "16px" },
+memberSection: { marginTop: "16px" },
+memberTitle:   { fontSize: "13px", fontWeight: "600",
+                 marginBottom: "8px", color: "#1a1a2e" },
+memberEditRow: { display: "flex", alignItems: "center",
+                 gap: "8px", marginBottom: "8px",
+                 padding: "8px", backgroundColor: "#f9f9f9",
+                 borderRadius: "6px" },
+memberRole:    { fontSize: "11px", color: "#666",
+                 backgroundColor: "#eee", padding: "2px 6px",
+                 borderRadius: "10px" },
+removeBtn:     { fontSize: "12px", backgroundColor: "#dc3545",
+                 color: "white", border: "none", padding: "3px 8px",
+                 borderRadius: "4px", cursor: "pointer",
+                 marginLeft: "auto" },
+addMemberRow:  { display: "flex", gap: "8px", marginTop: "8px" },
+addMemberInput:{ flex: 1, padding: "8px 12px",
+                 border: "1px solid #ddd", borderRadius: "6px",
+                 fontSize: "13px" },
+addBtn:        { backgroundColor: "#1a1a2e", color: "white",
+                 border: "none", padding: "8px 16px",
+                 borderRadius: "4px", cursor: "pointer",
+                 fontSize: "13px" },
+editMsg:       { fontSize: "13px", color: "#444", marginBottom: "12px" },                  
 };
 
 export default Dashboard;
