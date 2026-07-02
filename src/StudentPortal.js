@@ -49,14 +49,24 @@ function StudentPortal({ user }) {
   };
 
   const selectGroup = async (group) => {
-    setSelected(group);
-    const [membersRes, scoreRes] = await Promise.all([
-      axios.get(`${API}/group-members/${group.id}`),
-      axios.get(`${API}/my-score/${group.id}/${user.email}`)
-    ]);
-    setMembers(membersRes.data);
-    setMyScore(scoreRes.data);
-  };
+  setSelected(group);
+  const [membersRes, scoreRes] = await Promise.all([
+    axios.get(`${API}/group-members/${group.id}`),
+    axios.get(`${API}/my-score/${group.id}/${user.email}`)
+  ]);
+  setMembers(membersRes.data);
+  setMyScore(scoreRes.data);
+
+  // Log activity once per session
+  if (!sessionStorage.getItem(`logged_${group.id}`)) {
+    axios.post(`${API}/log-activity`, {
+      group_id: group.id,
+      user_email: user.email,
+      action: "dashboard_view"
+    });
+    sessionStorage.setItem(`logged_${group.id}`, "true");
+  }
+};
 
   const submitRating = async (ratedEmail) => {
     const score = ratings[ratedEmail];
