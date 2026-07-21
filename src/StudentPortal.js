@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://127.0.0.1:5000";
+const API = "https://smartcollab-backend-781602191566.us-central1.run.app";
 
 function StarRating({ value, onChange }) {
   return (
@@ -101,128 +101,164 @@ function StudentPortal({ user }) {
 
   return (
     <div style={styles.container}>
+      <div style={styles.layout}>
 
-      {/* Group selector */}
-      {groups.length > 1 && (
-        <div style={styles.card}>
-          <h2 style={styles.cardTitle}>My Groups</h2>
-          {groups.map(g => (
-            <button key={g.id}
-              style={{
-                ...styles.groupBtn,
-                backgroundColor: selected?.id === g.id ? "#1a1a2e" : "#f0f2f5",
-                color: selected?.id === g.id ? "white" : "#1a1a2e"
-              }}
-              onClick={() => selectGroup(g)}>
-              {g.group_name} — {g.unit}
-            </button>
-          ))}
+        {/* Left column — image */}
+        <div style={styles.imageColumn}>
+          <img src="/login-banner.jpg" alt="SmartCollab" style={styles.sideImage} />
         </div>
-      )}
 
-      {selected && (
-        <>
-          {/* Group info */}
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>{selected.group_name}</h2>
-            <p style={styles.unit}>{selected.unit}</p>
-            <div style={styles.links}>
-              <a href={selected.board_url} target="_blank"
-                rel="noreferrer" style={styles.link}>
-                Open Trello Board
-              </a>
-              <a href={selected.drive_folder_url} target="_blank"
-                rel="noreferrer" style={styles.link}>
-                Open Drive Folder
-              </a>
-            </div>
-          </div>
+        {/* Right column — content */}
+        <div style={styles.contentColumn}>
 
-          {/* My contribution score */}
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>My Contribution Score</h2>
-            {myScore && Object.keys(myScore).length > 0 ? (
-              <>
-                <div style={styles.totalScore}>
-                  {(
-                    (myScore.tasks_score || 0) +
-                    (myScore.files_score || 0) +
-                    (myScore.comments_score || 0) +
-                    (myScore.activity_score || 0) +
-                    (myScore.peer_score || 0)
-                  ).toFixed(0)} pts
-                </div>
-                <div style={styles.breakdown}>
-                  <div style={styles.breakdownItem}>
-                    <span style={styles.breakdownLabel}>Tasks</span>
-                    <span style={styles.breakdownValue}>
-                      {myScore.tasks_score || 0}
-                    </span>
-                  </div>
-                  <div style={styles.breakdownItem}>
-                    <span style={styles.breakdownLabel}>Files</span>
-                    <span style={styles.breakdownValue}>
-                      {myScore.files_score || 0}
-                    </span>
-                  </div>
-                  <div style={styles.breakdownItem}>
-                    <span style={styles.breakdownLabel}>Comments</span>
-                    <span style={styles.breakdownValue}>
-                      {myScore.comments_score || 0}
-                    </span>
-                  </div>
-                  <div style={styles.breakdownItem}>
-                    <span style={styles.breakdownLabel}>Activity</span>
-                    <span style={styles.breakdownValue}>
-                      {myScore.activity_score || 0}
-                    </span>
-                  </div>
-                  <div style={styles.breakdownItem}>
-                    <span style={styles.breakdownLabel}>Peer</span>
-                    <span style={styles.breakdownValue}>
-                      {myScore.peer_score || 0}
-                    </span>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <p style={styles.empty}>
-                No activity recorded yet. Start working on your Trello board.
-              </p>
-            )}
-          </div>
-
-          {/* Peer rating */}
-          <div style={styles.card}>
-            <h2 style={styles.cardTitle}>Rate Your Group Members</h2>
-            {message && <p style={styles.message}>{message}</p>}
-            {members
-              .filter(m => m.user_email !== user.email)
-              .map(m => (
-                <div key={m.user_email} style={styles.memberRow}>
-                  <span style={styles.memberEmail}>{m.user_email}</span>
-                  <StarRating
-                    value={ratings[m.user_email] || 0}
-                    onChange={val => setRatings({
-                      ...ratings, [m.user_email]: val
-                    })}
-                  />
-                  <button
-                    style={styles.rateBtn}
-                    onClick={() => submitRating(m.user_email)}>
-                    Submit
-                  </button>
-                </div>
+          {/* Group selector */}
+          {groups.length > 1 && (
+            <div style={styles.card}>
+              <h2 style={styles.cardTitle}>My Groups</h2>
+              {groups.map(g => (
+                <button key={g.id}
+                  style={{
+                    ...styles.groupBtn,
+                    backgroundColor: selected?.id === g.id ? "#1a1a2e" : "#f0f2f5",
+                    color: selected?.id === g.id ? "white" : "#1a1a2e"
+                  }}
+                  onClick={() => selectGroup(g)}>
+                  {g.group_name} — {g.unit}
+                </button>
               ))}
-          </div>
-        </>
-      )}
+            </div>
+          )}
+
+          {selected && (
+            <>
+              {/* Group info */}
+              <div style={styles.card}>
+                <h2 style={styles.cardTitle}>{selected.group_name}</h2>
+                <p style={styles.unit}>{selected.unit}</p>
+                <div style={styles.links}>
+                  <a href={selected.board_url} target="_blank"
+                    rel="noreferrer" style={styles.link}>
+                    Open Trello Board
+                  </a>
+                  <a href={selected.drive_folder_url} target="_blank"
+                    rel="noreferrer" style={styles.link}>
+                    Open Drive Folder
+                  </a>
+                </div>
+              </div>
+
+              {/* My contribution score */}
+              <div style={styles.card}>
+                <h2 style={styles.cardTitle}>My Contribution Score</h2>
+                {myScore && Object.keys(myScore).length > 0 ? (
+                  <>
+                    <div style={styles.totalScore}>
+                      {(
+                        (myScore.tasks_score || 0) +
+                        (myScore.files_score || 0) +
+                        (myScore.comments_score || 0) +
+                        (myScore.activity_score || 0) +
+                        (myScore.peer_score || 0)
+                      ).toFixed(0)} pts
+                    </div>
+                    <div style={styles.breakdown}>
+                      <div style={styles.breakdownItem}>
+                        <span style={styles.breakdownLabel}>Tasks</span>
+                        <span style={styles.breakdownValue}>
+                          {myScore.tasks_score || 0}
+                        </span>
+                      </div>
+                      <div style={styles.breakdownItem}>
+                        <span style={styles.breakdownLabel}>Files</span>
+                        <span style={styles.breakdownValue}>
+                          {myScore.files_score || 0}
+                        </span>
+                      </div>
+                      <div style={styles.breakdownItem}>
+                        <span style={styles.breakdownLabel}>Comments</span>
+                        <span style={styles.breakdownValue}>
+                          {myScore.comments_score || 0}
+                        </span>
+                      </div>
+                      <div style={styles.breakdownItem}>
+                        <span style={styles.breakdownLabel}>Activity</span>
+                        <span style={styles.breakdownValue}>
+                          {myScore.activity_score || 0}
+                        </span>
+                      </div>
+                      <div style={styles.breakdownItem}>
+                        <span style={styles.breakdownLabel}>Peer</span>
+                        <span style={styles.breakdownValue}>
+                          {myScore.peer_score || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p style={styles.empty}>
+                    No activity recorded yet. Start working on your Trello board.
+                  </p>
+                )}
+              </div>
+
+              {/* Peer rating */}
+              <div style={styles.card}>
+                <h2 style={styles.cardTitle}>Rate Your Group Members</h2>
+                {message && <p style={styles.message}>{message}</p>}
+                {members
+                  .filter(m => m.user_email !== user.email)
+                  .map(m => (
+                    <div key={m.user_email} style={styles.memberRow}>
+                      <span style={styles.memberEmail}>{m.user_email}</span>
+                      <StarRating
+                        value={ratings[m.user_email] || 0}
+                        onChange={val => setRatings({
+                          ...ratings, [m.user_email]: val
+                        })}
+                      />
+                      <button
+                        style={styles.rateBtn}
+                        onClick={() => submitRating(m.user_email)}>
+                        Submit
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
+
+        </div>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  container:      { padding: "24px", maxWidth: "800px", margin: "0 auto" },
+  container: { padding: "24px", maxWidth: "1500px", margin: "0" },
+  layout: {
+      display: "flex",
+      gap: "24px",
+      alignItems: "flex-start"
+  },
+  imageColumn: {
+      flex: "0 0 800px",
+      position: "sticky",
+      top: "24px",
+      marginLeft: "0",
+      alignSelf: "flex-start"
+  },
+  sideImage: {
+      width: "100%",
+      height: "800px",
+      objectFit: "cover",
+      borderRadius: "12px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      display: "block"
+  },
+  contentColumn: {
+      flex: "1",
+      minWidth: 0
+  },
   card:           { backgroundColor: "white", borderRadius: "12px",
                     padding: "24px", marginBottom: "24px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },

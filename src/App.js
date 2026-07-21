@@ -6,7 +6,7 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import StudentPortal from "./StudentPortal";
 
-const API = "http://127.0.0.1:5000";
+const API = "https://smartcollab-backend-781602191566.us-central1.run.app";
 
 function App() {
   const [user, setUser]       = useState(null);

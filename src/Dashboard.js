@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API = "http://127.0.0.1:5000";
+const API = "https://smartcollab-backend-781602191566.us-central1.run.app";
 
 function ScoreBar({ value, max = 100 }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
@@ -228,38 +228,76 @@ function Dashboard({ user }) {
 
   return (
     <div style={styles.container}>
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>Create New Group</h2>
-        <input style={styles.input} placeholder="Group name"
-          value={groupName} onChange={e => setGroupName(e.target.value)} />
-        <input style={styles.input} placeholder="Unit (e.g. DSE 315)"
-          value={unit} onChange={e => setUnit(e.target.value)} />
-        <input style={styles.input}
-          placeholder="Member emails (comma separated)"
-          value={members} onChange={e => setMembers(e.target.value)} />
-        <button style={styles.button} onClick={handleCreateGroup}
-          disabled={loading}>
-          {loading ? "Creating..." : "Create Group"}
-        </button>
-        {message && <p style={styles.message}>{message}</p>}
-      </div>
+      <div style={styles.layout}>
 
-      <div style={styles.card}>
-        <h2 style={styles.cardTitle}>All Groups ({groups.length})</h2>
-        {groups.length === 0 ? (
-          <p style={styles.empty}>No groups yet.</p>
-        ) : (
-          groups.map(group => (
-            <GroupCard key={group.id} group={group} />
-          ))
-        )}
+        {/* Left column — image */}
+        <div style={styles.imageColumn}>
+          <img src="/login-banner.jpg" alt="SmartCollab" style={styles.sideImage} />
+        </div>
+
+        {/* Right column — content */}
+        <div style={styles.contentColumn}>
+
+          {/* Create Group Form */}
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>Create New Group</h2>
+            <input style={styles.input} placeholder="Group name"
+              value={groupName} onChange={e => setGroupName(e.target.value)} />
+            <input style={styles.input} placeholder="Unit (e.g. DSE 315)"
+              value={unit} onChange={e => setUnit(e.target.value)} />
+            <input style={styles.input}
+              placeholder="Member emails (comma separated)"
+              value={members} onChange={e => setMembers(e.target.value)} />
+            <button style={styles.button} onClick={handleCreateGroup} disabled={loading}>
+              {loading ? "Creating..." : "Create Group"}
+            </button>
+            {message && <p style={styles.message}>{message}</p>}
+          </div>
+
+          {/* Groups List */}
+          <div style={styles.card}>
+            <h2 style={styles.cardTitle}>All Groups ({groups.length})</h2>
+            {groups.length === 0 ? (
+              <p style={styles.empty}>No groups yet.</p>
+            ) : (
+              groups.map(group => (
+                <GroupCard key={group.id} group={group} />
+              ))
+            )}
+          </div>
+
+        </div>
       </div>
     </div>
   );
 }
 
 const styles = {
-  container:      { padding: "24px", maxWidth: "800px", margin: "0 auto" },
+  container: { padding: "24px", maxWidth: "1500px", margin: "0" },
+  layout: {
+      display: "flex",
+      gap: "24px",
+      alignItems: "flex-start"
+  },
+  imageColumn: {
+      flex: "0 0 640px",
+      position: "sticky",
+      top: "24px",
+      marginLeft: "0",
+      alignSelf: "flex-start"
+  },
+  sideImage: {
+      width: "100%",
+      height: "620px",
+      objectFit: "cover",
+      borderRadius: "12px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+      display: "block"
+  },
+  contentColumn: {
+      flex: "1",
+      minWidth: 0
+  },
   card:           { backgroundColor: "white", borderRadius: "12px",
                     padding: "24px", marginBottom: "24px",
                     boxShadow: "0 2px 8px rgba(0,0,0,0.08)" },

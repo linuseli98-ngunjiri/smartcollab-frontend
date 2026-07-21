@@ -17,7 +17,7 @@ function Login({ onLogin }) {
     <div style={styles.container}>
       <div style={styles.card}>
         <h1 style={styles.title}>SmartCollab</h1>
-        <p style={styles.subtitle}>AI-Powered Group Collaboration System</p>
+        <p style={styles.subtitle}>AI-Assisted Group Collaboration System</p>
         <button style={styles.button} onClick={handleLogin}>
           Sign in with Google
         </button>
@@ -34,6 +34,7 @@ const styles = {
     height: "100vh",
     backgroundColor: "#f0f2f5"
   },
+  
   card: {
     backgroundColor: "white",
     padding: "40px",
