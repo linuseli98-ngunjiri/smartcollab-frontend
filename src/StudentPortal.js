@@ -33,6 +33,7 @@ function StudentPortal({ user }) {
 
   useEffect(() => {
     fetchMyGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchMyGroups = async () => {
